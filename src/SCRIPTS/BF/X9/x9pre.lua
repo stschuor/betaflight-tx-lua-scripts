@@ -1,6 +1,6 @@
 PageFiles = 
 {
-    "pids.lua",
+    "pids1.lua",
     "pids3.lua",
     "rates1.lua",
     "rates2.lua",
