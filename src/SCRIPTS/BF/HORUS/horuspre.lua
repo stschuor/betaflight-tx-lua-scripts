@@ -1,12 +1,15 @@
 PageFiles =
 {
-    "pids.lua",
+    "pids1.lua",
+    "pids2.lua",
     "rates1.lua",
     "rates2.lua",
     "filters.lua",
     "pwm.lua",
     "rx.lua",
-    "vtx.lua"
+    "vtx.lua",
+    "rescue.lua",
+    "gpspids.lua",
 }
 
 backgroundFill = TEXT_BGCOLOR

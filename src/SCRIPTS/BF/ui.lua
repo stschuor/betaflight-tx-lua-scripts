@@ -32,6 +32,7 @@ Page = nil
 
 backgroundFill = backgroundFill or ERASE
 foregroundColor = foregroundColor or SOLID
+
 globalTextOptions = globalTextOptions or 0
 
 local function saveSettings(new)
@@ -39,7 +40,10 @@ local function saveSettings(new)
         if Page.preSave then
             payload = Page.preSave(Page)
         else
-            payload = Page.values
+            payload = {}
+            for i=1,(Page.outputBytes or #Page.values) do
+                payload[i] = Page.values[i]
+            end
         end
         protocol.mspWrite(Page.write, payload)
         saveTS = getTime()
@@ -229,6 +233,7 @@ local function incValue(inc)
     local idx = f.i or currentLine
     local scale = (f.scale or 1)
     f.value = clipValue(f.value + ((inc*(f.mult or 1))/scale), (f.min/scale) or 0, (f.max/scale) or 255)
+    f.value = math.floor((f.value*scale)/(f.mult or 1) + 0.5)/(scale/(f.mult or 1))
     for idx=1, #(f.vals) do
         Page.values[f.vals[idx]] = bit32.rshift(f.value * scale, (idx-1)*8)
     end
@@ -282,7 +287,7 @@ function run_ui(event)
     if (event == userEvent.longPress.menu) then -- Taranis QX7 / X9
         menuActive = 1
         currentState = pageStatus.displayMenu
-    elseif userEvent.press.pageUp and (event == userEvent.longPress.enter) then -- Horus
+    elseif userEvent.press.pageDown and (event == userEvent.longPress.enter) then -- Horus
         menuActive = 1
         killEnterBreak = 1
         currentState = pageStatus.displayMenu
@@ -331,8 +336,11 @@ function run_ui(event)
             incValue(-1)
         end
     end
-    if Page == nil then
+    while Page == nil do
         Page = assert(loadScript(radio.templateHome .. PageFiles[currentPage]))()
+        if Page.requiredVersion and Page.requiredVersion > apiVersion then
+            incPage(1)
+        end
     end
     if not Page.values and currentState == pageStatus.display then
         requestPage()
